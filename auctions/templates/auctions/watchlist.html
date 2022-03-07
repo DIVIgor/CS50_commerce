@@ -1,0 +1,13 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    {% if watchlist %}
+        {% for element in watchlist %}
+            <p><a href="{{ element.listing.get_absolute_url }}">
+                {{ element.listing }}
+            </a></p>
+        {% endfor %}
+    {% else %}
+        There's nothing here yet.
+    {% endif %}
+{% endblock body %}

@@ -1,0 +1,13 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    {% if categories %}
+        <ul>
+            {% for cat in categories %}
+                <li><a href="{{ cat.get_absolute_url }}">{{ cat }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Sorry, this page is empty.</p>
+    {% endif %}
+{% endblock body %}

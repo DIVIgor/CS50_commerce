@@ -1,0 +1,15 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+{% if listings %}
+    <ul>
+        {% for listing in listings %}
+            <li>
+                <a href="{{ listing.get_absolute_url }}">{{ listing }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    There's nothing here yet.
+{% endif %}
+{% endblock body %}

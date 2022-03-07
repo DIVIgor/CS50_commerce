@@ -1,0 +1,68 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <h3>{{ listing.name }}</h3>
+    <p>{{ listing.image }}</p>
+    {% if current_bid %}
+        <p>Current bid: {{ current_bid }}$</p>
+    {% else %}
+        <p>Starting bid: {{ start_bid }}$</p>
+    {% endif %}
+    {% if user.is_authenticated and user != listing.user and user != current_bid_owner %}
+        <form method="POST">
+            {% csrf_token %}
+            {% comment %} <input type="hidden" name="listing" value="{{ listing }}"> {% endcomment %}
+            {% comment %} {{ bid_form.listing.as_hidden }} {% endcomment %}
+            {{ bid_form.as_p }}
+            {% comment %} {{ bid_form.errors }} {% endcomment %}
+            <button type="submit" name="bid_submit" value="bid">Make a Bid</button>
+        </form>
+    {% elif user == current_bid_owner %}
+        <p>Your bid is the highest</p>
+    {% elif user == listing.user %}
+        <a href="#">Close listing</a>
+    {% endif %}
+    <p>{{ listing.description|linebreaks }}</p>
+
+    <br><br><br>
+    {% if user.is_authenticated %}
+        <p>
+            <a href="{% url 'auctions:add_to_watchlist' cat_slug listing_slug %}">
+                {% if in_watchlist %}
+                    Delete from watchlist
+                {% else %}
+                    Add to watchlist
+                {% endif %}
+            </a>
+        </p>
+        <p>
+            <details>
+                <summary>Add a comment</summary>
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <button type="submit" name="comment_submit" value="comment">Add</button>
+                </form>
+            </details>
+        </p>
+    {% endif %}
+    <div>
+        <h3 style="border-bottom: solid 1px rgba(0,0,0,.1);">
+            Comments: {{ comments.count }}
+        </h3>
+        {% if comments %}
+            {% for comment in comments %}
+                <div style="border-bottom: solid 1px rgba(0,0,0,.1);">
+                    Posted by <b>{{ comment.user }}</b> <i>added {{ comment.date_added }}</i>
+                    <p>
+                        {{ comment.text|linebreaks }}
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="border-bottom: solid 1px rgba(0,0,0,.1);">
+                <i>No comments for this listing yet.</i>
+            </div>
+        {% endif %}
+    </div>
+{% endblock body %}

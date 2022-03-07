@@ -1,0 +1,13 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <form action="{% url 'auctions:add_listing' %}" method='POST'>
+        {% csrf_token %}
+        {% for field in listing_form %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <p>{{ field }}</p>
+            <div>{{ field.errors }}</div>
+        {% endfor %}
+        <button type="submit">Add Listing</button>
+    </form>
+{% endblock body %}
