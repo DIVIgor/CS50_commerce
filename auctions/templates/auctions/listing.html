@@ -2,13 +2,14 @@
 
 {% block body %}
     <h3>{{ listing.name }}</h3>
+    <div>by {{ listing_owner }}</div>
     <p>{{ listing.image }}</p>
     {% if current_bid %}
         <p>Current bid: {{ current_bid }}$</p>
     {% else %}
         <p>Starting bid: {{ start_bid }}$</p>
     {% endif %}
-    {% if user.is_authenticated and user != listing.user and user != current_bid_owner %}
+    {% if user.is_authenticated and user != listing_owner and user != current_bid_owner %}
         <form method="POST">
             {% csrf_token %}
             {% comment %} <input type="hidden" name="listing" value="{{ listing }}"> {% endcomment %}
@@ -17,24 +18,29 @@
             {% comment %} {{ bid_form.errors }} {% endcomment %}
             <button type="submit" name="bid_submit" value="bid">Make a Bid</button>
         </form>
-    {% elif user == current_bid_owner %}
+    {% elif user == current_bid_owner and listing.is_active %}
         <p>Your bid is the highest</p>
-    {% elif user == listing.user %}
-        <a href="#">Close listing</a>
+    {% elif user == listing_owner and listing.is_active %}
+        <a href="{% url 'auctions:close_listing' cat_slug listing_slug %}">Close listing</a>
+    {% endif %}
+    {% if not listing.is_active and user == current_bid_owner %}
+        <h3>Your bid won!</h3>
     {% endif %}
     <p>{{ listing.description|linebreaks }}</p>
 
     <br><br><br>
     {% if user.is_authenticated %}
-        <p>
-            <a href="{% url 'auctions:add_to_watchlist' cat_slug listing_slug %}">
-                {% if in_watchlist %}
-                    Delete from watchlist
-                {% else %}
-                    Add to watchlist
-                {% endif %}
-            </a>
-        </p>
+        {% if user != listing_owner %}
+            <p>
+                <a href="{% url 'auctions:add_to_watchlist' cat_slug listing_slug %}">
+                    {% if in_watchlist %}
+                        Delete from watchlist
+                    {% else %}
+                        Add to watchlist
+                    {% endif %}
+                </a>
+            </p>
+        {% endif %}
         <p>
             <details>
                 <summary>Add a comment</summary>

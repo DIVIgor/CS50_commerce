@@ -12,7 +12,7 @@ from .forms import ListingForm, BidForm, CommentForm
 
 
 def index(request):
-    newest_listings = Listing.objects.order_by('-date_added')[:5]
+    newest_listings = Listing.objects.filter(is_active=True).order_by('-date_added')[:5]
     context = {'active_listings': newest_listings}
     return render(request, 'auctions/index.html', context)
 
@@ -84,7 +84,8 @@ def get_listing(request, cat_slug, listing_slug):
     # comments = listing.comment_set.order_by('-date_added')
     context = {
         'listing': listing, 'cat_slug': cat_slug,
-        'listing_slug': listing_slug, 'start_bid': listing.start_bid
+        'listing_slug': listing_slug, 'start_bid': listing.start_bid,
+        'listing_owner': listing.user
     }
     
     get_comments(listing, context)
@@ -102,8 +103,12 @@ def get_listing(request, cat_slug, listing_slug):
         comment_form = CommentForm()
         context['comment_form'] = comment_form
 
-        is_author = request.user == listing.user
-        if not is_author and not user_bids[0].user == request.user: #request.user != listing.user:
+        is_author = request.user == context['listing_owner']
+        is_last_bidder = False
+        if user_bids:
+            is_last_bidder = user_bids[0] == request.user
+        
+        if not is_author and not is_last_bidder and listing.is_active: #request.user != listing.user:
             bid_form = BidForm()
             context['bid_form'] = bid_form
             # author = False
@@ -133,6 +138,20 @@ def get_listing(request, cat_slug, listing_slug):
     return render(request, 'auctions/listing.html', context)
 
 @login_required
+def get_users_listings(request):
+    user = get_object_or_404(User, username=request.user)
+    users_listings = user.listing_set.order_by('-date_added')
+    context = {'user': user, 'users_listings': users_listings}
+    return render(request, 'auctions/users_listings.html', context)
+
+@login_required
+def get_bidding(request):
+    user = get_object_or_404(User, username=request.user)
+    bids = user.bid_set.order_by('-date_added')
+    context = {'user': user, 'bids': bids}
+    return render(request, 'auctions/bidding.html', context)
+
+@login_required
 def add_listing(request):
     if request.method != 'POST':
         listing_form = ListingForm()
@@ -159,19 +178,23 @@ def get_watchlist(request):
 @login_required
 def add_to_watchlist(request, cat_slug, listing_slug):
     listing = get_object_or_404(Listing, slug=listing_slug)
-    watchlist, created = Watchlist.objects.get_or_create(user=request.user,
-        listing=listing)
-    if not created:
-        watchlist.delete()
+    if request.user != listing.user:
+        watchlist, created = Watchlist.objects.get_or_create(user=request.user,
+            listing=listing)
+        if not created:
+            watchlist.delete()
     return redirect('auctions:listing', cat_slug, listing_slug)
 
 def get_comments(listing, listing_context):
     comments = listing.comment_set.order_by('-date_added')
     return listing_context.update({'comments': comments})
 
+@login_required
 def close_listing(request, cat_slug, listing_slug):
     listing = get_object_or_404(Listing, slug=listing_slug)
     listing.is_active = False
+    listing.save()
+
     return redirect(listing.get_absolute_url())
 
 # @login_required

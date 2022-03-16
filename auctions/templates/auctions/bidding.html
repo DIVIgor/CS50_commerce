@@ -1,0 +1,16 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <h3>Your bidding</h3>
+    {% if bids %}
+        {% for bid in bids %}
+            <ul>
+                <li>
+                    <a href="{{bid.listing.get_absolute_url}}">{{bid.listing}} - {{bid.bid}}$</a>
+                </li>
+            </ul>
+        {% endfor %}
+    {% else %}
+        There's nothing here yet.
+    {% endif %}
+{% endblock body %}
