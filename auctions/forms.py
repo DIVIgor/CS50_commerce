@@ -11,8 +11,9 @@ class ListingForm(forms.ModelForm):
     class Meta:
         model = Listing
         fields = [
-            'category', 'name', 'description',
-            'start_bid', 'image'
+            'category', 'name',
+            'image', 'start_bid',
+            'description'
         ]
         labels = {
             'name': 'Listing name', 'category': 'Category',

@@ -12,7 +12,7 @@ from .forms import ListingForm, BidForm, CommentForm
 
 
 def index(request):
-    newest_listings = Listing.objects.filter(is_active=True).order_by('-date_added')[:5]
+    newest_listings = Listing.objects.filter(is_active=True).order_by('-date_added')
     context = {'active_listings': newest_listings}
     return render(request, 'auctions/index.html', context)
 
@@ -75,7 +75,7 @@ def get_categories(request):
 
 def get_listings_by_category(request, cat_slug):
     category = get_object_or_404(Category, slug=cat_slug)
-    listings = category.listing_set.order_by('-date_added')
+    listings = category.listing_set.filter(is_active=True).order_by('-date_added')
     context = {'category': category, 'listings': listings}
     return render(request, 'auctions/listings_by_cat.html', context)
 
@@ -171,7 +171,7 @@ def add_listing(request):
 
 @login_required
 def get_watchlist(request):
-    watchlist = Watchlist.objects.filter(user=request.user)
+    watchlist = Watchlist.objects.filter(user=request.user).order_by('-date_added')
     context = {'watchlist': watchlist}
     return render(request, 'auctions/watchlist.html', context)
 

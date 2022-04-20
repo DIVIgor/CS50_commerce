@@ -3,3 +3,5 @@ __pycache__/
 *.log
 *.pot
 *.pyc
+*.env
+*.sqlite3

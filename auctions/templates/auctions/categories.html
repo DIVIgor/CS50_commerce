@@ -3,10 +3,11 @@
 {% block title %}Categories{% endblock title %}
 
 {% block body %}
+    <h1 class="page-title">Categories</h1>
     {% if categories %}
-        <ul>
+        <ul class="basic-ul">
             {% for cat in categories %}
-                <li><a href="{{ cat.get_absolute_url }}">{{ cat }}</a></li>
+                <li><a class="basic-link" href="{{ cat.get_absolute_url }}">{{ cat }}</a></li>
             {% endfor %}
         </ul>
     {% else %}
